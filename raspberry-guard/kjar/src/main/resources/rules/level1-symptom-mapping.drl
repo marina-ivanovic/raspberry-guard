@@ -1,0 +1,190 @@
+package com.ftn.sbnz.rules;
+
+import com.ftn.sbnz.model.model.RaspberryState;
+import com.ftn.sbnz.model.model.Symptom;
+import com.ftn.sbnz.model.model.DiseaseCandidate;
+import com.ftn.sbnz.model.enums.GrowthPhase;
+import com.ftn.sbnz.model.enums.SymptomLocation;
+import com.ftn.sbnz.model.enums.PathogenType;
+
+rule "L1 - Didymella: purple spot on bud base"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "purple_spot", location == SymptomLocation.STEM, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Didymella applanata", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Didymella: cracked bark at stem base"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "cracked_bark", location == SymptomLocation.STEM, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Didymella applanata", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Didymella: leafing or pre-flowering phase"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState(currentPhase == GrowthPhase.LEAFING || currentPhase == GrowthPhase.PRE_FLOWERING)
+        Symptom(name == "purple_spot", $sev : severity)
+    then
+        insert(new DiseaseCandidate("Didymella applanata", PathogenType.DISEASE, 5));
+end
+
+rule "L1 - Leptosphaeria: necrotic spots on stem"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "necrotic_spot", location == SymptomLocation.STEM, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Leptosphaeria coniothyrium", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Leptosphaeria: cracked bark + spot on ground level"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "cracked_bark", location == SymptomLocation.STEM, $sev1 : severity)
+        Symptom(name == "necrotic_spot", location == SymptomLocation.STEM, $sev2 : severity)
+    then
+        insert(new DiseaseCandidate("Leptosphaeria coniothyrium", PathogenType.DISEASE, $sev1 + $sev2));
+end
+
+rule "L1 - Botrytis: soft watery fruits"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "soft_fruit", location == SymptomLocation.FRUIT, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Botrytis cinerea", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Botrytis: grey coating on fruit"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "grey_coating", location == SymptomLocation.FRUIT, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Botrytis cinerea", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Botrytis: flowering or fruiting phase"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState(currentPhase == GrowthPhase.FLOWERING || currentPhase == GrowthPhase.FRUITING)
+        Symptom(name == "grey_coating")
+    then
+        insert(new DiseaseCandidate("Botrytis cinerea", PathogenType.DISEASE, 5));
+end
+
+rule "L1 - Elsinoe: purple spots on young shoots"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "purple_spot_stem", location == SymptomLocation.STEM, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Elsinoe venetum", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Elsinoe: sunken spot damaging the bark"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "sunken_spot_bark", location == SymptomLocation.STEM, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Elsinoe venetum", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Verticillium: sudden wilting before or during harvest"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState(currentPhase == GrowthPhase.HARVEST || currentPhase == GrowthPhase.FRUITING)
+        Symptom(name == "sudden_wilting", $sev : severity)
+    then
+        insert(new DiseaseCandidate("Verticillium albo-atrum", PathogenType.DISEASE, $sev + 5));
+end
+
+rule "L1 - Verticillium: wilting at the root"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "sudden_wilting", location == SymptomLocation.ROOT, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Verticillium albo-atrum", PathogenType.DISEASE, $sev));
+end
+
+rule "L1 - Anthonomus rubi: pre-flowering phase bud separation"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState(currentPhase == GrowthPhase.PRE_FLOWERING)
+        Symptom(name == "cut_bud_stem", location == SymptomLocation.FLOWER, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Anthonomus rubi", PathogenType.PEST, $sev + 5));
+end
+
+rule "L1 - Anthonomus rubi: dried flower bud"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "dried_flower_bud", location == SymptomLocation.FLOWER, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Anthonomus rubi", PathogenType.PEST, $sev));
+end
+
+rule "L1 - Byturus tomentosus: round hole at calyx base"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "round_hole_calyx", location == SymptomLocation.FLOWER, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Byturus tomentosus", PathogenType.PEST, $sev));
+end
+
+rule "L1 - Tetranychus urtice: whitish spots on upper leaf"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "whitish_spots", location == SymptomLocation.LEAF, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Tetranychus urtice", PathogenType.PEST, $sev));
+end
+
+rule "L1 - Tetranychus urtice: spider web on lower leaf"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "spider_web", location == SymptomLocation.LEAF, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Tetranychus urtice", PathogenType.PEST, $sev));
+end
+
+rule "L1 - Lasioptera rubi: galls on stems"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "galls_on_stem", location == SymptomLocation.STEM, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Lasioptera rubi", PathogenType.PEST, $sev));
+end
+
+rule "L1 - Aphididae: deformed leaves and honeydew"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "deformed_leaves", location == SymptomLocation.LEAF, $sev1 : severity)
+        Symptom(name == "honeydew", location == SymptomLocation.LEAF, $sev2 : severity)
+    then
+        insert(new DiseaseCandidate("Aphididae", PathogenType.PEST, $sev1 + $sev2));
+end
+
+rule "L1 - Aphididae: deformation of fruiting twigs"
+    agenda-group "level1-symptom-mapping"
+    when
+        RaspberryState()
+        Symptom(name == "deformed_twigs", location == SymptomLocation.STEM, $sev : severity)
+    then
+        insert(new DiseaseCandidate("Aphididae", PathogenType.PEST, $sev));
+end

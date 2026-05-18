@@ -6,14 +6,14 @@ public class Symptom {
 
     private String name;
     private SymptomLocation location;
-    private int intensity; // 1-10
+    private int severity; // 1-10
 
     public Symptom() {}
 
-    public Symptom(String name, SymptomLocation location, int intensity) {
+    public Symptom(String name, SymptomLocation location, int severity) {
         this.name = name;
         this.location = location;
-        this.intensity = intensity;
+        this.severity = severity;
     }
 
     public String getName() { return name; }
@@ -22,11 +22,11 @@ public class Symptom {
     public SymptomLocation getLocation() { return location; }
     public void setLocation(SymptomLocation location) { this.location = location; }
 
-    public int getIntensity() { return intensity; }
-    public void setIntensity(int intensity) { this.intensity = intensity; }
+    public int getSeverity() { return severity; }
+    public void setSeverity(int severity) { this.severity = severity; }
 
     @Override
     public String toString() {
-        return "Symptom{name='" + name + "', location=" + location + ", intensity=" + intensity + "}";
+        return "Symptom{name='" + name + "', location=" + location + ", severity=" + severity + "}";
     }
 }
