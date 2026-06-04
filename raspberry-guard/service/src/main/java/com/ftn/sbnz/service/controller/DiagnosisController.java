@@ -1,7 +1,7 @@
 package com.ftn.sbnz.service.controller;
 
-import com.ftn.sbnz.model.model.RaspberryState;
 import com.ftn.sbnz.model.model.TreatmentPlan;
+import com.ftn.sbnz.service.dto.DiagnosisRequest;
 import com.ftn.sbnz.service.service.DiagnosisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,9 +22,9 @@ public class DiagnosisController {
     }
 
     @PostMapping
-    public ResponseEntity<List<TreatmentPlan>> getDiagnosis(@RequestBody RaspberryState state) {
+    public ResponseEntity<List<TreatmentPlan>> getDiagnosis(@RequestBody DiagnosisRequest request) {
         try {
-            List<TreatmentPlan> treatmentPlans = diagnosisService.diagnose(state);
+            List<TreatmentPlan> treatmentPlans = diagnosisService.diagnose(request);
             return new ResponseEntity<>(treatmentPlans, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

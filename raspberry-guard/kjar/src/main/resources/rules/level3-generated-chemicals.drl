@@ -1,0 +1,92 @@
+package com.ftn.sbnz.rules;
+import com.ftn.sbnz.model.model.Diagnosis;
+import com.ftn.sbnz.model.model.RaspberryState;
+import com.ftn.sbnz.model.model.TreatmentPlan;
+
+rule "Reccomended pesticide Quadris for Didymella applanata_0"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Didymella applanata")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "HARVEST")
+    then
+        $plan.addTreatment("CHEMICAL: Quadris (Azoxystrobin) ? 1.0 L/ha. Waiting period: 14 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Quadris for Didymella applanata");
+end
+
+rule "Reccomended pesticide Switch for Botrytis cinerea_1"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Botrytis cinerea")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "HARVEST")
+    then
+        $plan.addTreatment("CHEMICAL: Switch (Cyprodinil) ? 0.8 kg/ha. Waiting period: 7 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Switch for Botrytis cinerea");
+end
+
+rule "Reccomended pesticide Teldor for Botrytis cinerea_2"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Botrytis cinerea")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "HARVEST")
+    then
+        $plan.addTreatment("CHEMICAL: Teldor (Fenhexamid) ? 1.0 kg/ha. Waiting period: 3 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Teldor for Botrytis cinerea");
+end
+
+rule "Reccomended pesticide Actara for Aphididae_3"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Aphididae")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "FLOWERING")
+    then
+        $plan.addTreatment("CHEMICAL: Actara (Thiamethoxam) ? 0.02 %. Waiting period: 14 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Actara for Aphididae");
+end
+
+rule "Reccomended pesticide Abamectin for Tetranychus urtice_4"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Tetranychus urtice")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "NONE")
+    then
+        $plan.addTreatment("CHEMICAL: Abamectin (Abamectin) ? 0.075 %. Waiting period: 14 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Abamectin for Tetranychus urtice");
+end
+
+rule "Reccomended pesticide Signum for Leptosphaeria coniothyrium_5"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Leptosphaeria coniothyrium")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "HARVEST")
+    then
+        $plan.addTreatment("CHEMICAL: Signum (Boscalid + Pyraclostrobin) ? 1.0 kg/ha. Waiting period: 14 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Signum for Leptosphaeria coniothyrium");
+end
+
+rule "Reccomended pesticide Karate Zeon for Anthonomus rubi_6"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Anthonomus rubi")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "FLOWERING")
+    then
+        $plan.addTreatment("CHEMICAL: Karate Zeon (Lambda-cyhalothrin) ? 0.2 L/ha. Waiting period: 14 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Karate Zeon for Anthonomus rubi");
+end
+
+rule "Reccomended pesticide Calypso for Byturus tomentosus_7"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Byturus tomentosus")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "HARVEST")
+    then
+        $plan.addTreatment("CHEMICAL: Calypso (Thiacloprid) ? 0.2 L/ha. Waiting period: 14 days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: Calypso for Byturus tomentosus");
+end

@@ -1,0 +1,9 @@
+targetDisease,tradeName,activeSubstance,recommendedDosage,dosageUnit,waitingPeriodDays,forbiddenPhase
+Didymella applanata,Quadris,Azoxystrobin,1.0,L/ha,14,HARVEST
+Botrytis cinerea,Switch,Cyprodinil,0.8,kg/ha,7,HARVEST
+Botrytis cinerea,Teldor,Fenhexamid,1.0,kg/ha,3,HARVEST
+Aphididae,Actara,Thiamethoxam,0.02,%,14,FLOWERING
+Tetranychus urtice,Abamectin,Abamectin,0.075,%,14,NONE
+Leptosphaeria coniothyrium,Signum,Boscalid + Pyraclostrobin,1.0,kg/ha,14,HARVEST
+Anthonomus rubi,Karate Zeon,Lambda-cyhalothrin,0.2,L/ha,14,FLOWERING
+Byturus tomentosus,Calypso,Thiacloprid,0.2,L/ha,14,HARVEST

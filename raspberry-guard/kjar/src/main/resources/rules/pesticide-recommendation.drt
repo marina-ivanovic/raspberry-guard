@@ -1,0 +1,29 @@
+template header
+targetDisease
+tradeName
+activeSubstance
+recommendedDosage
+dosageUnit
+waitingPeriodDays
+forbiddenPhase
+
+package com.ftn.sbnz.rules;
+
+import com.ftn.sbnz.model.model.Diagnosis;
+import com.ftn.sbnz.model.model.RaspberryState;
+import com.ftn.sbnz.model.model.TreatmentPlan;
+
+template "pesticide-recommendation"
+
+rule "Reccomended pesticide @{tradeName} for @{targetDisease}_@{row.rowNumber}"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "@{targetDisease}")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        $state : RaspberryState(currentPhase.name() != "@{forbiddenPhase}")
+    then
+        $plan.addTreatment("CHEMICAL: @{tradeName} (@{activeSubstance}) — @{recommendedDosage} @{dosageUnit}. Waiting period: @{waitingPeriodDays} days before harvest.");
+        System.out.println("[TEMPLATE] Added persticide: @{tradeName} for @{targetDisease}");
+end
+
+end template

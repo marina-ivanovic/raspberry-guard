@@ -1,0 +1,127 @@
+package com.ftn.sbnz.rules;
+
+import com.ftn.sbnz.model.model.WeatherMeasurement;
+import com.ftn.sbnz.model.model.RiskAlert;
+
+declare WeatherMeasurement
+    @role(event)
+    @timestamp(timestamp)
+end
+
+declare RiskAlert
+    @role(event)
+    @timestamp(activeSince)
+end
+
+declare window WeatherLast48h
+    WeatherMeasurement() over window:time(48h)
+    from entry-point "weather-stream"
+end
+
+declare window WeatherLast72h
+    WeatherMeasurement() over window:time(72h)
+    from entry-point "weather-stream"
+end
+
+declare window WeatherLast6h
+    WeatherMeasurement() over window:time(6h)
+    from entry-point "weather-stream"
+end
+
+declare window RiskAlertLast120h
+    RiskAlert() over window:time(120h)
+    from entry-point "weather-stream"
+end
+
+// =============================================================================
+// CEP Rule 1: Risk of grey mold (Botrytis cinerea)
+// Condition: total rainfall >= 40mm AND average temperature 10-20C in last 48h
+// =============================================================================
+rule "CEP - Botrytis cinerea infection risk"
+    agenda-group "cep-rules"
+    when
+        Number($totalRainfall : doubleValue >= 40.0) from accumulate(
+            WeatherMeasurement($r : rainfall) from window WeatherLast48h,
+            sum($r)
+        )
+        Number($avgTemp : doubleValue >= 10.0 && <= 20.0) from accumulate(
+            WeatherMeasurement($t : temperature) from window WeatherLast48h,
+            average($t)
+        )
+    then
+        System.out.println("[CEP] WARNING: High risk of Botrytis cinerea! " +
+            "Rainfall: " + $totalRainfall + "mm, Avg temp: " + $avgTemp + "C");
+        insert(new RiskAlert(
+            "Botrytis cinerea",
+            "HIGH",
+            "Preventive fungicide application recommended within 24h."
+        ));
+end
+
+// =============================================================================
+// CEP Rule 2: Risk of spider mite (Tetranychus urtice)
+// Condition: average temperature > 30C AND average humidity < 40% in last 72h
+// =============================================================================
+rule "CEP - Tetranychus urtice infestation risk"
+    agenda-group "cep-rules"
+    when
+        Number($avgTemp : doubleValue > 30.0) from accumulate(
+            WeatherMeasurement($t : temperature) from window WeatherLast72h,
+            average($t)
+        )
+        Number($avgHumidity : doubleValue < 40.0) from accumulate(
+            WeatherMeasurement($h : humidity) from window WeatherLast72h,
+            average($h)
+        )
+    then
+        System.out.println("[CEP] WARNING: High risk of Tetranychus urtice! " +
+            "Avg temp: " + $avgTemp + "C, Avg humidity: " + $avgHumidity + "%");
+        insert(new RiskAlert(
+            "Tetranychus urtice",
+            "HIGH",
+            "Apply acaricide. Increase irrigation to reduce temperature and raise humidity."
+        ));
+end
+
+// =============================================================================
+// CEP Rule 3: Treatment washed out by rain
+// Condition: total rainfall >= 15mm in last 6h
+// =============================================================================
+rule "CEP - Chemical treatment washed out by rain"
+    agenda-group "cep-rules"
+    when
+        Number($totalRainfall : doubleValue >= 15.0) from accumulate(
+            WeatherMeasurement($r : rainfall) from window WeatherLast6h,
+            sum($r)
+        )
+    then
+        System.out.println("[CEP] WARNING: Chemical treatment likely washed out! " +
+            $totalRainfall + "mm of rain in the last 6 hours.");
+        insert(new RiskAlert(
+            "WASH_OUT",
+            "HIGH",
+            "Chemical treatment was washed out by rain. Repeat application."
+        ));
+end
+
+// =============================================================================
+// CEP Rule 4: Persistent high risk (>= 3 RiskAlert events in 120h)
+// Condition: 3 or more HIGH RiskAlerts for Botrytis in the last 5 days
+// =============================================================================
+rule "CEP - Persistent high risk of Botrytis (PersistentRiskAlert)"
+    agenda-group "cep-rules"
+    when
+        Number($count : intValue >= 3) from accumulate(
+            RiskAlert(pathogen == "Botrytis cinerea", riskLevel == "HIGH")
+                from window RiskAlertLast120h,
+            count(1)
+        )
+    then
+        System.out.println("[CEP] URGENT: Persistent high risk of Botrytis cinerea! " +
+            "Detected " + $count + " consecutive warnings in 5 days.");
+        insert(new RiskAlert(
+            "Botrytis cinerea",
+            "URGENT",
+            "URGENT PREVENTIVE INTERVENTION: Apply fungicide immediately, do not wait for symptoms."
+        ));
+end
