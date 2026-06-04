@@ -1,12 +1,17 @@
 package com.ftn.sbnz.service.service;
 
 import com.ftn.sbnz.model.model.*;
+import com.ftn.sbnz.service.dto.DiagnosisRequest;
+
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.EntryPoint; // DODATO OVO
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.kie.api.event.rule.DebugAgendaEventListener;
 
 @Service
 public class DiagnosisService {
@@ -17,16 +22,30 @@ public class DiagnosisService {
         this.kieContainer = kieContainer;
     }
 
-    public List<TreatmentPlan> diagnose(RaspberryState state) {
+    public List<TreatmentPlan> diagnose(DiagnosisRequest request) {
         KieSession kieSession = kieContainer.newKieSession();
         List<TreatmentPlan> results = new ArrayList<>();
 
         try {
-            kieSession.insert(state);
-            for (Symptom symptom : state.getSymptoms()) {
-                kieSession.insert(symptom);
+            if (request.getState() != null) {
+                kieSession.insert(request.getState());
+                if (request.getState().getSymptoms() != null) {
+                    for (Symptom symptom : request.getState().getSymptoms()) {
+                        kieSession.insert(symptom);
+                    }
+                }
             }
 
+            if (request.getWeatherMeasurements() != null) {
+                EntryPoint weatherStream = kieSession.getEntryPoint("weather-stream");
+                for (WeatherMeasurement wm : request.getWeatherMeasurements()) {
+                    weatherStream.insert(wm);
+                }
+            }
+
+            kieSession.addEventListener(new DebugAgendaEventListener());
+
+            activateGroup(kieSession, "cep-rules");
             activateGroup(kieSession, "level1-symptom-mapping");
             activateGroup(kieSession, "level2-diagnosis-confirmation");
             activateGroup(kieSession, "level3-treatment-strategy");

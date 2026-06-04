@@ -7,155 +7,107 @@ import com.ftn.sbnz.model.model.Symptom;
 import com.ftn.sbnz.model.enums.GrowthPhase;
 import com.ftn.sbnz.model.enums.PathogenType;
 
-rule "L3 - Treatment: Didymella applanata - chemical in leafing"
+rule "L3 - Create Plan for Diagnosis"
     agenda-group "level3-treatment-strategy"
+    salience 100
     when
-        $dx : Diagnosis(issueName == "Didymella applanata")
-        RaspberryState(currentPhase == GrowthPhase.LEAFING || currentPhase == GrowthPhase.PRE_FLOWERING || currentPhase == GrowthPhase.BUD_SWELLING)
+        $dx : Diagnosis()
+        not TreatmentPlan(diagnosis == $dx)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Quadris (Azoxystrobin) — 1.0 L/ha. Withholding period: 14 days before harvest.");
-        plan.addTreatment("AGROTECHNICAL: Remove and burn infected shoots immediately after harvest.");
-        plan.addTreatment("AGROTECHNICAL: Avoid high planting density for better ventilation.");
-        insert(plan);
+        insert(new TreatmentPlan($dx));
 end
 
-rule "L3 - Treatment: Didymella applanata - harvest banned chemicals"
+rule "L3 - Treatment: Didymella applanata - agrotechnical"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Didymella applanata")
+        $plan : TreatmentPlan(diagnosis == $dx)
+        RaspberryState(currentPhase != GrowthPhase.HARVEST)
+    then
+        $plan.addTreatment("AGROTECHNICAL: Remove and burn infected shoots immediately after harvest.");
+        $plan.addTreatment("AGROTECHNICAL: Avoid high planting density for better ventilation.");
+end
+
+rule "L3 - Treatment: Didymella applanata - harvest"
+    agenda-group "level3-treatment-strategy"
+    when
+        $dx : Diagnosis(issueName == "Didymella applanata")
+        $plan : TreatmentPlan(diagnosis == $dx)
         RaspberryState(currentPhase == GrowthPhase.HARVEST)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addAlert("WARNING: Chemical treatment is not allowed during harvest!");
-        plan.addTreatment("MECHANICAL: Manually remove and destroy infected shoots.");
-        plan.addTreatment("AGROTECHNICAL: Apply copper-based fungicides immediately after harvest.");
-        insert(plan);
+        $plan.addAlert("WARNING: Chemical treatment is not allowed during harvest!");
+        $plan.addTreatment("MECHANICAL: Manually remove and destroy infected shoots.");
 end
 
-rule "L3 - Treatment: Botrytis cinerea - flowering and pre-harvest"
+rule "L3 - Treatment: Botrytis cinerea - agrotechnical"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Botrytis cinerea")
-        RaspberryState(currentPhase == GrowthPhase.FLOWERING || currentPhase == GrowthPhase.FRUITING)
+        $plan : TreatmentPlan(diagnosis == $dx)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Switch (Cyprodinil + Fludioxonil) — 0.8 kg/ha. Withholding period: 7 days.");
-        plan.addTreatment("CHEMICAL: Alternative — Teldor (Fenhexamid) — 1.0 kg/ha. Withholding period: 3 days.");
-        plan.addTreatment("AGROTECHNICAL: Improve ventilation within the plantation — pruning.");
-        plan.addTreatment("AGROTECHNICAL: Remove infected fruits immediately upon detection.");
-        insert(plan);
+        $plan.addTreatment("AGROTECHNICAL: Improve ventilation within the plantation — pruning.");
+        $plan.addTreatment("AGROTECHNICAL: Remove infected fruits immediately upon detection.");
 end
 
-rule "L3 - Treatment: Aphididae - vegetation"
+rule "L3 - Treatment: Aphididae - agrotechnical and biological"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Aphididae")
-        RaspberryState(currentPhase != GrowthPhase.HARVEST && currentPhase != GrowthPhase.FLOWERING)
+        $plan : TreatmentPlan(diagnosis == $dx)
+        RaspberryState(currentPhase != GrowthPhase.FLOWERING)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Actara (Thiamethoxam) — 0.02% solution. Withholding period: 14 days.");
-        plan.addTreatment("BIOLOGICAL: Encourage natural enemies (ladybugs, lacewings).");
-        plan.addTreatment("AGROTECHNICAL: Apply water sprays for mechanical removal of colonies.");
-        insert(plan);
+        $plan.addTreatment("BIOLOGICAL: Encourage the presence of natural enemies (ladybugs).");
+        $plan.addTreatment("AGROTECHNICAL: Apply water sprays for mechanical removal of colonies.");
 end
 
 rule "L3 - Treatment: Aphididae - during flowering"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Aphididae")
+        $plan : TreatmentPlan(diagnosis == $dx)
         RaspberryState(currentPhase == GrowthPhase.FLOWERING)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addAlert("WARNING: Insecticides are STRICTLY FORBIDDEN during flowering to protect bees!");
-        plan.addTreatment("BIOLOGICAL: Introduce beneficial insects.");
-        plan.addTreatment("AGROTECHNICAL: Remove heavily infested twigs manually.");
-        insert(plan);
+        $plan.addAlert("WARNING: Insecticides are STRICTLY FORBIDDEN during flowering to protect bees!");
+        $plan.addTreatment("AGROTECHNICAL: Manually remove twigs with the most colonies.");
 end
 
-rule "L3 - Treatment: Tetranychus urtice"
+rule "L3 - Treatment: Tetranychus urtice - agrotechnical"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Tetranychus urtice")
-        RaspberryState()
+        $plan : TreatmentPlan(diagnosis == $dx)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Abamectin — 0.075%. Withholding period: 14 days.");
-        plan.addTreatment("AGROTECHNICAL: Ensure optimal irrigation, as mites thrive in drought conditions.");
-        insert(plan);
+        $plan.addTreatment("AGROTECHNICAL: Ensure optimal irrigation, mites multiply in drought.");
 end
 
-rule "L3 - Treatment: Leptosphaeria coniothyrium"
+rule "L3 - Treatment: Leptosphaeria coniothyrium - agrotechnical"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Leptosphaeria coniothyrium")
-        RaspberryState()
+        $plan : TreatmentPlan(diagnosis == $dx)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Signum (Boscalid + Pyraclostrobin) — 1.0 kg/ha.");
-        plan.addTreatment("AGROTECHNICAL: Prune and burn infected canes. Avoid mechanical injuries to stems.");
-        insert(plan);
-end
-
-rule "L3 - Treatment: Elsinoe venetum"
-    agenda-group "level3-treatment-strategy"
-    when
-        $dx : Diagnosis(issueName == "Elsinoe venetum")
-        RaspberryState()
-    then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Copper-based fungicides during bud swelling. Captan during vegetation.");
-        plan.addTreatment("AGROTECHNICAL: Ensure good air circulation and weed control.");
-        insert(plan);
+        $plan.addTreatment("AGROTECHNICAL: Prune and burn infected canes. Avoid mechanical injuries.");
 end
 
 rule "L3 - Treatment: Verticillium albo-atrum"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Verticillium albo-atrum")
-        RaspberryState()
+        $plan : TreatmentPlan(diagnosis == $dx)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addAlert("WARNING: No effective chemical cure exists for Verticillium wilt!");
-        plan.addTreatment("AGROTECHNICAL: Uproot and burn the entire infected plant with its root system.");
-        plan.addTreatment("PREVENTION: Practice crop rotation. Do not plant raspberries after tomatoes, potatoes, or strawberries.");
-        insert(plan);
-end
-
-rule "L3 - Treatment: Anthonomus rubi"
-    agenda-group "level3-treatment-strategy"
-    when
-        $dx : Diagnosis(issueName == "Anthonomus rubi")
-        RaspberryState(currentPhase == GrowthPhase.PRE_FLOWERING || currentPhase == GrowthPhase.LEAFING)
-    then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Karate Zeon (Lambda-cyhalothrin) — 0.2 L/ha. Apply BEFORE flowering.");
-        plan.addTreatment("AGROTECHNICAL: Collect and burn dried, severed flower buds.");
-        insert(plan);
-end
-
-rule "L3 - Treatment: Byturus tomentosus"
-    agenda-group "level3-treatment-strategy"
-    when
-        $dx : Diagnosis(issueName == "Byturus tomentosus")
-        RaspberryState(currentPhase != GrowthPhase.HARVEST)
-    then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addTreatment("CHEMICAL: Calypso (Thiacloprid) or similar systemic insecticide before flowering.");
-        plan.addTreatment("BIOLOGICAL: Use white sticky traps to monitor and catch adult beetles.");
-        insert(plan);
+        $plan.addAlert("WARNING: There is no effective chemical cure for Verticillium wilt!");
+        $plan.addTreatment("AGROTECHNICAL: Uproot and burn the entire infected plant including the roots.");
+        $plan.addTreatment("PREVENTION: Crop rotation. Do not plant raspberries after tomatoes, potatoes, or strawberries.");
 end
 
 rule "L3 - Treatment: Lasioptera rubi"
     agenda-group "level3-treatment-strategy"
     when
         $dx : Diagnosis(issueName == "Lasioptera rubi")
-        RaspberryState()
+        $plan : TreatmentPlan(diagnosis == $dx)
     then
-        TreatmentPlan plan = new TreatmentPlan($dx);
-        plan.addAlert("WARNING: Chemical treatments are ineffective because the larvae are protected inside the gall.");
-        plan.addTreatment("MECHANICAL: Prune the cane BELOW the gall and burn it. Do this during autumn or winter.");
-        insert(plan);
+        $plan.addAlert("WARNING: Chemicals are ineffective because the larva is protected inside the gall.");
+        $plan.addTreatment("MECHANICAL: Cut the cane BELOW the gall and burn it during autumn/winter.");
 end
 
 rule "L3 - Treatment: Urgent Severity Alert"
@@ -164,5 +116,16 @@ rule "L3 - Treatment: Urgent Severity Alert"
         $plan : TreatmentPlan()
         exists(Symptom(getSeverity() >= 8))
     then
-        $plan.addAlert("URGENT: Critical severity (>=8) detected! Immediate action required within 24h.");
+        $plan.addAlert("URGENT: Critical symptom severity detected (>=8)! React within 24h.");
+end
+
+rule "L3 - Create preventive plan from RiskAlert"
+    agenda-group "level3-treatment-strategy"
+    when
+        $alert : RiskAlert()
+    then
+        Diagnosis prevDx = new Diagnosis("PREVENTIVE RISK: " + $alert.getPathogen(), PathogenType.DISEASE, 1.0);
+        TreatmentPlan plan = new TreatmentPlan(prevDx);
+        plan.addAlert("CEP ALARM (" + $alert.getRiskLevel() + "): " + $alert.getRecommendation());
+        insert(plan);
 end

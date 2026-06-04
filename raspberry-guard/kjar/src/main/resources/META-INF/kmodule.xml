@@ -5,4 +5,10 @@
         <ksession name="malina-ks" default="true" type="stateful"/>
     </kbase>
 
+    <kbase name="malina-cep-kb"
+           packages="com.ftn.sbnz.rules"
+           eventProcessingMode="stream">
+        <ksession name="malina-cep-ks" type="stateful" clockType="realtime"/>
+    </kbase>
+
 </kmodule>
