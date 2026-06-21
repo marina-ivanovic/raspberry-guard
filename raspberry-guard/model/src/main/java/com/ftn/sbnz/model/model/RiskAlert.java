@@ -12,6 +12,7 @@ public class RiskAlert {
     private String pathogen;
     private String riskLevel;
     private String recommendation;
+    private String location;
     private Date activeSince;
 
     public RiskAlert() {
@@ -25,6 +26,14 @@ public class RiskAlert {
         this.activeSince = new Date();
     }
 
+    public RiskAlert(String pathogen, String riskLevel, String recommendation, String location) {
+        this.pathogen = pathogen;
+        this.riskLevel = riskLevel;
+        this.recommendation = recommendation;
+        this.location = location;
+        this.activeSince = new Date();
+    }
+
     public String getPathogen() { return pathogen; }
     public void setPathogen(String pathogen) { this.pathogen = pathogen; }
 
@@ -34,12 +43,16 @@ public class RiskAlert {
     public String getRecommendation() { return recommendation; }
     public void setRecommendation(String recommendation) { this.recommendation = recommendation; }
 
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
     public Date getActiveSince() { return activeSince; }
     public void setActiveSince(Date activeSince) { this.activeSince = activeSince; }
 
     @Override
     public String toString() {
         return "RiskAlert{pathogen='" + pathogen + "', riskLevel='" + riskLevel
+                + "', location='" + location
                 + "', recommendation='" + recommendation + "'}";
     }
 }
