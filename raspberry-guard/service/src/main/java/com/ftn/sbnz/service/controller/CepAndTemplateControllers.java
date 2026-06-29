@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.ftn.sbnz.service.service.CepService;
 import com.ftn.sbnz.service.service.TemplateService;
@@ -26,6 +27,35 @@ class CepController {
     @PostMapping("/analyze")
     public List<RiskAlert> analyzeWeather(@RequestBody List<WeatherMeasurement> measurements) {
         return cepService.analyzeWeather(measurements);
+    }
+
+    @PostMapping("/weather")
+    public List<RiskAlert> submitWeatherMeasurement(
+            @RequestBody WeatherMeasurement measurement,
+            @RequestParam(defaultValue = "true") boolean usePseudoClock) {
+        return cepService.insertMeasurement(measurement, usePseudoClock);
+    }
+
+    @PostMapping("/spray")
+    public List<RiskAlert> submitSprayEvent(
+            @RequestBody Map<String, Object> sprayEventData,
+            @RequestParam(defaultValue = "true") boolean usePseudoClock) {
+        return cepService.insertSprayEvent(sprayEventData, usePseudoClock);
+    }
+
+    @GetMapping("/status")
+    public List<RiskAlert> getActiveAlerts(
+            @RequestParam(required = false) String location,
+            @RequestParam(defaultValue = "true") boolean usePseudoClock) {
+        if (location != null && !location.isBlank()) {
+            return cepService.getActiveAlertsForLocation(location, usePseudoClock);
+        }
+        return cepService.getActiveAlerts(usePseudoClock);
+    }
+
+    @PostMapping("/reset")
+    public void resetDemoSession() {
+        cepService.resetPseudoSession();
     }
 }
 

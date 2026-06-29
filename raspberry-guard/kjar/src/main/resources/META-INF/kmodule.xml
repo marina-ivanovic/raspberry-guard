@@ -9,6 +9,7 @@
            packages="com.ftn.sbnz.rules"
            eventProcessingMode="stream">
         <ksession name="malina-cep-ks" type="stateful" clockType="realtime"/>
+        <ksession name="malina-cep-ks-pseudo" type="stateful" clockType="pseudo"/>
     </kbase>
 
 </kmodule>
